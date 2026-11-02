@@ -1,0 +1,27 @@
+﻿@page "/"
+@using System.Diagnostics;
+@using NovelsSearchApp.Models;
+@using NovelsSearchApp.Components.Pages;
+@using NovelsSearchApp.Components.Pages.UserInput;
+@rendermode InteractiveServer
+
+<PageTitle>なろう小説検索</PageTitle>
+
+@*Begin novels search field*@
+<SearchCriteria @ref="ChangeGetParamForAPI" OnClickToSearch="DisplayResults" OnParamChanged="DisplayResults"/>
+@*End novels search field*@
+
+@*Begin novel results*@
+<PartOfDisplaySearchResults
+IsSearchbuttonpushedInChild = "IsSearchbuttonpushed"
+IsGettingAPISuccessInChild = "IsGettingAPISuccess"
+IsApiErrorInChild = "IsApiError"
+NovelParametersForPageCount = "ChangeGetParamForAPI?.NovelParameters"
+GetAllcountForPageNumber = "AllCountForPageNumber"
+OnPagenationParam = "DisplayResults"
+NovelsInChild = "novels"
+ToCheckQueryParam = "@CheckAPI"
+/>
+
+<p>※「小説家になろう」は株式会社ヒナプロジェクトの登録商標です。</p>
+@*End novel results*@

@@ -1,0 +1,252 @@
+@using NovelsSearchApp.Models
+@inject IJSRuntime JSRuntime
+@rendermode InteractiveServer
+
+@namespace NovelsSearchApp.Components.Pages
+
+
+@*Begin novel results*@
+<div>
+    @if(IsSearchbuttonpushedInChild)@*If getting API and button is pushed, display results of Searched novels.*@
+    {
+        @if(!IsApiErrorInChild && NovelsInChild != null)
+        {
+            @if(NovelsInChild.Any() && GetAllcountForPageNumber != 0)
+            {
+                int lim = int.Parse(NovelParametersForPageCount.LimSelect);
+                int offset = (NovelParametersForPageCount.CurrentPageNumber -1) * lim;
+                int currentPageIndex = 1;
+                
+                @*<div>@ToCheckQueryParam</div>*@
+                @*<div>DisplayTimes:@NovelParametersForPageCount.TheNumberOfDisplayingTimes</div>*@
+                <div id="novel-list-top">全ページ数:@CalculateAllPages()</div>
+
+                //this is `allcount` of novels. If There are some data in `LPC`, the number of `NovelsInChild` is displayed.
+                @if(!string.IsNullOrWhiteSpace(NovelParametersForPageCount.LowPriorityCriteria))
+                {
+                    <div>検索ヒット数：@LocalNovelStock!.Count</div>
+                }
+                else
+                {
+                    <div>検索ヒット数：@GetAllcountForPageNumber</div>
+                }
+
+                @if(!string.IsNullOrWhiteSpace(NovelParametersForPageCount.LowPriorityCriteria))
+                {//This if statement block is for AND Search.
+                    <div>
+                        <div>
+                            @if(NovelParametersForPageCount.CurrentPageNumber != 1)
+                            {
+                                <button @onclick="() => HandlePagenationAsync(NovelParametersForPageCount.CurrentPageNumber - 1)">Back</button>
+                            }
+
+                            <strong>@NovelParametersForPageCount.CurrentPageNumber</strong>
+
+                            @if(NovelParametersForPageCount.TheNumberOfDisplayingTimes <= 3 || NovelParametersForPageCount.CurrentPageNumber < CalculateAllPages())
+                            {
+                                <button @onclick="() => HandlePagenationAsync(NovelParametersForPageCount.CurrentPageNumber + 1)">Next</button>
+                            }
+                        </div>
+
+                        <div>
+                            @foreach(var novel in NovelsInChildForDisplaying!)
+                            {
+                                overRank = offset + currentPageIndex;
+
+                                <div class="card mb-4 shadow-sm">
+                                    <div class="card-header bg-transparent">
+                                        <span style="color:red; font-weight:bold;">
+                                            @overRank
+                                        </span>
+                                        <span class="ms-3">
+                                            @GenreMapper.GetGenreValue(novel.Genre)
+                                        </span>
+                                    </div>
+
+                                    <div class="card-body">
+                                        <h4 class="card-title">
+                                            <a href="@GetNovelURL(novel.Ncode)" target="_blank" rel="noopener noreferrer">@novel.Title</a>
+                                        </h4>
+                                        <p class="card-subtitle mb-2 text-muted">@novel.Writer</p>
+                                        <p class="card-text">@novel.Story</p>
+                                        <p class="card-text">
+                                            <small class="text-muted">@novel.Keyword</small>
+                                        </p>
+                                    </div>
+
+                                    <div class="card-footer bg-transparent text-muted">
+                                        <small class="me-3">話数：@novel.General_all_no</small>
+                                        <small class="me-3">総合ポイント：@novel.Global_point</small>
+                                        <small>更新日：@novel.Novelupdated_at</small>
+                                    </div>
+                                </div>
+                                currentPageIndex++;
+                            }
+                        </div>
+                            
+                        <div>
+                            @if(NovelParametersForPageCount.CurrentPageNumber != 1)
+                            {
+                                <button @onclick="() => HandlePagenationAsync(NovelParametersForPageCount.CurrentPageNumber - 1)">Back</button>
+                            }
+
+                            <storng>@NovelParametersForPageCount.CurrentPageNumber</storng>
+
+                            @if(NovelParametersForPageCount.TheNumberOfDisplayingTimes <= 3 || NovelParametersForPageCount.CurrentPageNumber < CalculateAllPages())
+                            {
+                                <button @onclick="() => HandlePagenationAsync(NovelParametersForPageCount.CurrentPageNumber + 1)">Next</button>
+                            }
+                        </div>
+                    </div>
+                }
+                else//This else block is for OR Search.
+                {
+                    <div>
+                        <div>
+                            @if(NovelParametersForPageCount.CurrentPageNumber != 1)
+                            {
+                                <button @onclick="() => HandlePagenationAsync(MakePageList().FirstOrDefault())">@backArrowSymbol</button>
+                                <button @onclick="() => HandlePagenationAsync(NovelParametersForPageCount.CurrentPageNumber - 1)">Back</button>
+                            }
+
+
+                            @foreach(var displayedPages in MakeDisplayPages())
+                            {
+                                @if(displayedPages == NovelParametersForPageCount.CurrentPageNumber)
+                                {
+                                    <strong>@displayedPages</strong>
+                                }
+                                else
+                                {
+                                    <button  @onclick="() => HandlePagenationAsync(displayedPages)">@displayedPages</button>
+                                }
+                                
+                            }
+
+                            @if(NovelParametersForPageCount.CurrentPageNumber != MakePageList().Last())
+                            {
+                                <button @onclick="() => HandlePagenationAsync(NovelParametersForPageCount.CurrentPageNumber + 1)">Next</button>
+                                <button @onclick="() => HandlePagenationAsync(MakePageList().Last())">@forwardArrowSymbol</button>
+                            }
+                        </div>
+                        
+                        <div>
+                            @foreach(var novel in NovelsInChildForDisplaying!)
+                            {
+                                overRank = offset + currentPageIndex;
+
+                                <div class="card mb-4 shadow-sm">
+                                    <div class="card-header bg-transparent">
+                                        <span style="color:red; font-weight:bold;">
+                                            @overRank
+                                        </span>
+                                        <span class="ms-3">
+                                            @GenreMapper.GetGenreValue(novel.Genre)
+                                        </span>
+                                    </div>
+
+                                    <div class="card-body">
+                                        <h4 class="card-title">
+                                            <a href="@GetNovelURL(novel.Ncode)" target="_blank" rel="noopener noreferrer">@novel.Title</a>
+                                        </h4>
+                                        <p class="card-subtitle mb-2 text-muted">@novel.Writer</p>
+                                        <p class="card-text">@novel.Story</p>
+                                        <p class="card-text">
+                                            <small class="text-muted">@novel.Keyword</small>
+                                        </p>
+                                    </div>
+
+                                    <div class="card-footer bg-transparent text-muted">
+                                        <small class="me-3">話数：@novel.General_all_no</small>
+                                        <small class="me-3">総合ポイント：@novel.Global_point</small>
+                                        <small>更新日：@novel.Novelupdated_at</small>
+                                    </div>
+                                </div>
+                                currentPageIndex++;
+                            }
+                        </div>
+
+                        <div>
+                            @if(NovelParametersForPageCount.CurrentPageNumber != 1)
+                            {
+                                <button @onclick="() => HandlePagenationAsync(MakePageList().FirstOrDefault())">@backArrowSymbol</button>
+                                <button @onclick="() => HandlePagenationAsync(NovelParametersForPageCount.CurrentPageNumber - 1)">Back</button>
+                            }
+
+                            @foreach(var displayedPages in MakeDisplayPages())
+                            {
+                                @if(displayedPages == NovelParametersForPageCount.CurrentPageNumber)
+                                {
+                                    <strong>@displayedPages</strong>
+                                }
+                                else
+                                {
+                                    <button  @onclick="() => HandlePagenationAsync(displayedPages)">@displayedPages</button>
+                                }
+                            }
+
+                            @if(NovelParametersForPageCount.CurrentPageNumber != MakePageList().Last())
+                            {
+                                <button @onclick="() => HandlePagenationAsync(NovelParametersForPageCount.CurrentPageNumber + 1)">Next</button>
+                                <button @onclick="() => HandlePagenationAsync(MakePageList().Last())">@forwardArrowSymbol</button>
+                            }
+                        </div>
+                    </div>
+                }
+                
+            }
+            else
+            {
+                <p>お探しのキーワードに該当する小説が見つかりませんでした。ほかのキーワードを入力してください。</p>
+            }
+        }
+        else if(!IsApiErrorInChild && NovelsInChild == null)
+        {
+            <p>読み込み中です...</p>
+        }
+        else
+        {
+            <p style="color: red;">通信エラーが発生したか、データを取得できませんでした。時間をおいて再度お試しください。</p>
+        }
+        
+    }    
+    else
+    {
+        <p>検索ボタンを押してください。</p>
+    }
+</div>
+@*End novel results*@
+
+@*Begin the number of pages of novels in lower area.*@
+@*End the number of pages of novels in lower area.*@
+    
+@code{
+    //This is Parameter zone.
+    [Parameter] 
+    public bool IsGettingAPISuccessInChild { get; set; }
+    
+    [Parameter]
+    public IEnumerable<NovelModel>? NovelsInChild { get; set; }
+        
+    [Parameter]
+    public bool IsSearchbuttonpushedInChild { get; set;}
+
+    [Parameter]
+    public int GetAllcountForPageNumber { get; set; }
+
+    [Parameter]
+    public SearchConditionModel NovelParametersForPageCount { get; set; } = default!;
+
+    [Parameter]
+    public EventCallback OnPagenationParam { get; set; }
+
+    [Parameter]
+    public string? ToCheckQueryParam { get; set; }
+
+    [Parameter]
+    public bool IsApiErrorInChild { get; set; }
+
+    private string backArrowSymbol = "<<";
+    private string forwardArrowSymbol = ">>";
+    private int overRank;
+}

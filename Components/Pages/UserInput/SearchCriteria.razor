@@ -1,0 +1,84 @@
+@using NovelsSearchApp.Components.Pages;
+@using NovelsSearchApp.Models;
+@using System.ComponentModel.DataAnnotations;
+
+@rendermode InteractiveServer
+
+@namespace NovelsSearchApp.Components.Pages.UserInput
+
+@*Begin novel Search field.*@
+<h2>なろう小説検索</h2>
+<EditForm Model="NovelParameters" OnValidSubmit="OnClickToSearch" class="editForm card d-inline-flex">
+
+    <div>
+        <div class="row align-items-center">
+            <label class="col-md-3 col-form-label">すべてのキーワードを含む小説を検索</label>
+            <div class="col-md-auto">
+                <input class="form-control border border-black" style="width: 350px;" type="text" @bind="NovelParameters.HighPriorityCriteria"/>
+            </div>
+        </div>
+
+        <div class="row mb-3 align-items-center">
+            <label class="col-md-3 col-form-label">いずれかのキーワードを含む小説を検索</label>
+            <div class="col-md-auto">
+                <input class="form-control  border border-black" style="width: 350px;" type="text" @bind="NovelParameters.LowPriorityCriteria"/>
+            </div>
+        </div>
+
+        <div class="row mb-3 align-items-center">
+            <label class="col-md-3 col-form-label">除外キーワード</label>
+            <div class="col-md-auto">
+                <input class="form-control  border border-black" style="width: 350px; type="text" @bind="NovelParameters.Exceptword"/>
+            </div>
+        </div>
+    </div>
+@*End search criteria input section*@
+
+@*Begin order change section*@
+    <div class="row mb-3 align-items-center">
+        <label class="col-md-3 col-form-label">並び替え</label>
+        <div class="col-md-auto">
+            <select class="form-select text-center border border-black" name="order" @bind="NovelParameters.OrderSelect" @bind:after="HandleParamChangedAsync">
+            <option value="new" selected>新着更新順</option>
+            <option value="favnovelcnt">ブックマーク数の多い順</option>
+            <option value="reviewcnt">レビュー数の多い順</option>
+            <option value="hyoka">総合ポイントの高い順</option>
+            <option value="dailypoint">日間ポイントの高い順</option>
+            <option value="weeklypoint">週間ポイントの高い順</option>
+            <option value="monthlypoint">月間ポイントの高い順</option>
+            <option value="quarterpoint">四半期ポイントの高い順</option>
+            <option value="yearlypoint">年間ポイントの高い順</option>
+            <option value="impressioncnt">感想の多い順</option>
+            <option value="hyokacnt">評価者の多い順</option>
+            <option value="weekly">週間ユニークアクセスが多い順</option>
+        </select>
+        </div>
+    </div>
+    <div class="row align-items-center">
+        <label class="col-md-3 col-form-label">検索結果表示数変更</label>
+        <div class="col-md-auto">
+            <select class="form-select text-center border border-black" name="limNumber" @bind="NovelParameters.LimSelect" @bind:after="HandleParamChangedAsync">
+            <option value="10">10</option>
+            <option value="20" selected>20</option>
+            <option value="30">30</option>
+            <option value="40">40</option>
+            <option value="50">50</option>
+        </select>
+        </div>
+    </div>
+
+@*End novel Search field*@
+        <div>
+            <button class="btn btn-primary" @onclick="InitializeVariableEvent" type="submit">検索</button>
+        </div>
+</EditForm>
+
+@*Check connect of code-behind file.*@
+
+
+@code{
+    [Parameter] public EventCallback OnClickToSearch { get; set; }
+
+    [Parameter] public EventCallback OnParamChanged { get; set; }
+    //CriteriaOfSearchingNovels behindcodeSearching = new CriteriaOfSearchingNovels();
+}
