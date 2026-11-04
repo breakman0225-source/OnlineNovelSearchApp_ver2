@@ -13,7 +13,7 @@ builder.Services.AddHttpClient("NarouAPI", httpClient =>
     httpClient.BaseAddress = new Uri("https://api.syosetu.com/");//I think this URI cover R18 API.
 
     //Set a user agent to avoid being blocked by the server.
-    httpClient.DefaultRequestHeaders.Add("User-Agent", "NovelSearchApp/1.0");
+    httpClient.DefaultRequestHeaders.Add("User-Agent", "NovelSearchApp/2.0");
 });
 //End of HTTP client code.
 
