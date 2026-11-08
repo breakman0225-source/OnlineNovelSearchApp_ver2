@@ -1,14 +1,10 @@
 //I will write the code to get API data which is in Narou developer and display it.
 using System.Text.Json;
 using Microsoft.AspNetCore.Components;
-using System.Net.Http;
 using NovelsSearchApp.Models;
-using System.Net.Http.Json;
-using System.Linq;
-using System.Diagnostics;
 using NovelsSearchApp.Components.Pages.UserInput;
-using System.Security.Cryptography.X509Certificates;
-using System.Collections.Immutable;
+using System.IO;
+using System.IO.Compression;
 
 namespace NovelsSearchApp.Components.Pages;
 
@@ -65,7 +61,10 @@ public partial class NovelsSearch : ComponentBase
                 IsGettingAPISuccess = true;
 
                 using var responseStream = await response.Content.ReadAsStreamAsync();
-                IEnumerable<NovelModel>? novelsList = await JsonSerializer.DeserializeAsync<IEnumerable<NovelModel>>(responseStream);
+
+                using var decompressedStream = new GZipStream(responseStream, CompressionMode.Decompress);
+
+                IEnumerable<NovelModel>? novelsList = await JsonSerializer.DeserializeAsync<IEnumerable<NovelModel>>(decompressedStream);
                 if(novelsList != null && novelsList.Any())
                 {
                     //Get allcount to calculate the number of all pages.

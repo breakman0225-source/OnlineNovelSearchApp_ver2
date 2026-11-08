@@ -25,6 +25,7 @@ public class SearchConditionDict
        var keywordOfSearch = new Dictionary<string, string?>
        {
             {"out", "json"},
+            {"gzip", "5"},
             {"of", "t-n-w-s-g-k-ga-gp-nu"}
             //This "of" parameter specify output items. in this case, 
             // "title, wirter, abstract, genre, keyword, global_point, novelupdated_at, and ncode which is " is oututed.
