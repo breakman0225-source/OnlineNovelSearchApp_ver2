@@ -46,7 +46,7 @@ public partial class NovelsSearch : ComponentBase
         {
             while(accumulatedNovels.Count < lim && loopIndex <= 3)
             {
-                var currentSt = loopIndex * 500 + 1;//This `currentSt` is used for `OR Search`
+                /*var currentSt = loopIndex * 500 + 1;//This `currentSt` is used for `OR Search`
 
                 //`CheckAPI` is used for check the contents of URL which get the information of novels by query parameters.
                 CheckAPI = ChangeGetParamForAPI.ChangeQueryString(currentSt);
@@ -64,7 +64,16 @@ public partial class NovelsSearch : ComponentBase
 
                 using var decompressedStream = new GZipStream(responseStream, CompressionMode.Decompress);
 
-                IEnumerable<NovelModel>? novelsList = await JsonSerializer.DeserializeAsync<IEnumerable<NovelModel>>(decompressedStream);
+                IEnumerable<NovelModel>? novelsList = await JsonSerializer.DeserializeAsync<IEnumerable<NovelModel>>(decompressedStream);*/
+
+                //`CheckAPI` is used for check the contents of URL which get the information of novels by query parameters.
+
+                int fetchLimit = 500;
+                int currentSt = loopIndex * fetchLimit + 1;//This `currentSt` is used for `OR Search`
+
+                CheckAPI = ChangeGetParamForAPI.ChangeQueryString(currentSt);
+
+                List<NovelModel>? novelsList = await FetchNovelsFromApiAsync(httpClient, CheckAPI);
                 if(novelsList != null && novelsList.Any())
                 {
                     //Get allcount to calculate the number of all pages.
@@ -155,5 +164,22 @@ public partial class NovelsSearch : ComponentBase
             StateHasChanged();
         }
 
+    }
+
+    public async Task<List<NovelModel>> FetchNovelsFromApiAsync(HttpClient httpClient ,string checkAPI)
+    {
+        using HttpResponseMessage response = await httpClient.GetAsync(checkAPI);//Handle the return of `ChaneQueryString`.
+
+        //`EnsureSuccessStatusCode`checks whether the status code returned by API is in 200 range.
+        //If the status code is not in 200 range, it immediately throws an `HttpRequestException`.
+        response.EnsureSuccessStatusCode();
+
+        //`responseStream` and `decompressedStream` are used to read the response content and decompress it using GZipStream.
+        using var responseStream = await response.Content.ReadAsStreamAsync();
+        using var decompressedStream = new GZipStream(responseStream, CompressionMode.Decompress);
+
+        List<NovelModel>? novelsListAsReturn = await JsonSerializer.DeserializeAsync<List<NovelModel>>(decompressedStream);
+
+        return novelsListAsReturn ?? new List<NovelModel>();
     }
 }
